@@ -1,19 +1,19 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'docker-compose'
+description: 'Run docker-compose command'
+author: 'Svetlin Ralchev'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  docker-compose-path:
+    description: 'The path to the docker-compose.yml'
+    default: 'docker-compose.yml'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  docker-compose-profile:
+    description: 'The docker compose profile'
+    default: '${{ github.job }}'
+    required: true
 
 runs:
   using: node20
-  main: dist/index.js
+  main: dist/index.main.js
+  post: dist/index.post.js

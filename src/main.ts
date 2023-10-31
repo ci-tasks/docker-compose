@@ -1,26 +1,31 @@
+import * as fs from 'fs'
+import * as ps from 'child_process'
 import * as core from '@actions/core'
-import { wait } from './wait'
 
-/**
- * The main function for the action.
- * @returns {Promise<void>} Resolves when the action is complete.
- */
-export async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
+export async function main() {
+  const docker_compose_path = core.getInput('docker-compose-path')
+  const docker_compose_profile = core.getInput('docker-compose-profile')
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+  const command = `docker-compose --file ${docker_compose_path} --profile ${docker_compose_profile} up --detach`
+  const options = { cwd: process.env.GITHUB_WORKSPACE }
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+  if (fs.existsSync(docker_compose_path)) {
+    core.info(`Running ${command} ...`)
+    // execute the command
+    ps.execSync(command, options)
+  }
+}
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    // Fail the workflow run if an error occurs
-    if (error instanceof Error) core.setFailed(error.message)
+export async function post() {
+  const docker_compose_path = core.getInput('docker-compose-path')
+  const docker_compose_profile = core.getInput('docker-compose-profile')
+
+  const command = `docker-compose --file ${docker_compose_path} --profile ${docker_compose_profile} down`
+  const options = { cwd: process.env.GITHUB_WORKSPACE }
+
+  if (fs.existsSync(docker_compose_path)) {
+    core.info(`Running ${command} ...`)
+    // execute the command
+    ps.execSync(command, options)
   }
 }
